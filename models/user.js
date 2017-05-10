@@ -1,6 +1,8 @@
 const Sequelize = require('sequelize'),
+    bcrypt = require('bcrypt'),
     sequelize = require('./sequelize'),
-    { getErrorMsg, BaseGet } = require('../helpers/model');
+    { BaseGet, getErrorMsg } = require('../helpers/model'),
+    saltRounds = 10;
 
 const Users = sequelize.define('users', {
     id: {
@@ -61,7 +63,7 @@ const findUser = async (conditions) => {
         attributes: ['username', 'email', 'password']
     });
     const res = [];
-    if (Users != null) {
+    if (users != null) {
         for (let user of users) {
             res.push(BaseUserInfo(user));
         }
@@ -70,7 +72,7 @@ const findUser = async (conditions) => {
 };
 exports.findUser = findUser;
 
-exports.addUser = async (username, email, password) => {
+exports.addUser = async ({ username, email, password }) => {
     const users = await findUser({
         '$or': [ { username }, { email } ]
     });
@@ -82,6 +84,7 @@ exports.addUser = async (username, email, password) => {
             err = getErrorMsg('邮箱被占用');
         }
     } else {
+        password = await bcrypt.hash(password, saltRounds);
         await Users.create({
             username,
             email,

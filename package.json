@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/zp1996/LsgoGroupBe#readme",
   "dependencies": {
+    "bcrypt": "^1.0.2",
     "koa": "^2.2.0",
     "koa-bodyparser": "^4.2.0",
     "koa-logger": "^2.0.1",
