@@ -21,6 +21,7 @@
     "bcrypt": "^1.0.2",
     "koa": "^2.2.0",
     "koa-bodyparser": "^4.2.0",
+    "koa-jwt": "^3.2.1",
     "koa-logger": "^2.0.1",
     "koa-router": "^7.1.1",
     "mysql": "^2.13.0",

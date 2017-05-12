@@ -5,10 +5,6 @@ const Sequelize = require('sequelize'),
     saltRounds = 10;
 
 const Users = sequelize.define('users', {
-    id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true
-    },
     username: {
         type: Sequelize.STRING,
         get: BaseGet('username')
@@ -57,10 +53,10 @@ exports.findUserById = async id => {
     return user && BaseUserInfo(user);
 };
 
-const findUser = async (conditions) => {
+const findUser = async (conditions, attributes = ['id', 'username', 'email', 'password']) => {
     const users = await Users.findAll({
         where: conditions,
-        attributes: ['username', 'email', 'password']
+        attributes
     });
     const res = [];
     if (users != null) {
@@ -76,23 +72,23 @@ exports.addUser = async ({ username, email, password }) => {
     const users = await findUser({
         '$or': [ { username }, { email } ]
     });
-    let err = null;
+    let res = null;
     if (users.length) {
         if (username === users[0].username) {
-            err = getErrorMsg('用户名被占用');
+            res = getErrorMsg('用户名被占用');
         } else if (email === users[0].email) {
-            err = getErrorMsg('邮箱被占用');
+            res = getErrorMsg('邮箱被占用');
         }
     } else {
         password = await bcrypt.hash(password, saltRounds);
-        await Users.create({
+        res = await Users.create({
             username,
             email,
             password,
             status: 1
-        });
+        }).get('id');
     }
-    return err;
+    return res;
 };
 
 exports.deleteUser = async id => {

@@ -1,7 +1,9 @@
 const bcrypt = require('bcrypt'),
+    jwt = require('jsonwebtoken'),
     { addUser, findUser } = require('../models/user'),
     { badRequest } = require('../helpers/utils'),
-    RE = require('../helpers/pattern');
+    RE = require('../helpers/pattern'),
+    { sercet } = require('../config');
 
 const baseJudge = ctx => {
     let errKey = null;
@@ -19,13 +21,13 @@ module.exports = router => {
     router.post('/register', async ctx => {
         const flag = baseJudge(ctx);
         if (!flag) return flag;
-        const err = await addUser(ctx.request.body);
-        if (err == null) {
+        const res = await addUser(ctx.request.body);
+        if (typeof res === 'number') {
             ctx.body = {
-                test: true
+                token: jwt.sign({ id: res }, sercet)
             };
         } else  {
-            badRequest(ctx, err.msg);
+            badRequest(ctx, res.msg);
         }
     });
 
@@ -33,15 +35,18 @@ module.exports = router => {
         const flag = baseJudge(ctx);
         if (!flag) return flag;
         const { email, password } = ctx.request.body;
-        const user = await findUser({ email });
+        const user = await findUser({ email }, ['id', 'password', 'type']);
         if (user.length === 0) {
             return badRequest(ctx, '该邮箱未注册！');
         } else {
-            const { password } = user[0],
+            const { id, password } = user[0],
                 flag = await bcrypt.compare(password, password);
             if (!flag) {
                 return badRequest(ctx, '密码错误！');
             }
+            ctx.body = {
+                token: jwt.sign({ id }, sercet)
+            };
         }
         ctx.body = {
             test: true
