@@ -17,6 +17,16 @@ const baseJudge = ctx => {
     return flag || badRequest(ctx, RE[errKey].msg);
 };
 
+const verify = (token) => new Promise((resolve, reject) => {
+    jwt.verify(token, sercet, (err, decoded) => {
+        if (err) {
+            reject(err);
+        } else {
+            resolve(decoded);
+        }
+    });
+});
+
 module.exports = router => {
     router.post('/register', async ctx => {
         const flag = baseJudge(ctx);
@@ -34,13 +44,13 @@ module.exports = router => {
     router.post('/login', async ctx => {
         const flag = baseJudge(ctx);
         if (!flag) return flag;
-        const { email, password } = ctx.request.body;
+        const { email, password: reqPassword } = ctx.request.body;
         const user = await findUser({ email }, ['id', 'password', 'type']);
         if (user.length === 0) {
             return badRequest(ctx, '该邮箱未注册！');
         } else {
             const { id, password } = user[0],
-                flag = await bcrypt.compare(password, password);
+                flag = await bcrypt.compare(reqPassword, password);
             if (!flag) {
                 return badRequest(ctx, '密码错误！');
             }
@@ -48,9 +58,17 @@ module.exports = router => {
                 token: jwt.sign({ id }, sercet)
             };
         }
-        ctx.body = {
-            test: true
-        };
+    });
+
+    router.post('/auth', async ctx => {
+        const { token } = ctx.request.body;
+        try {
+            ctx.body = {
+                login: Boolean(await verify(token))
+            };
+        } catch (err) {
+            ctx.body = { login: false };
+        }
     });
 };
 
