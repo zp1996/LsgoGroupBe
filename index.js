@@ -3,6 +3,7 @@ const Koa = require('koa'),
     KoaRouter = new require('koa-router'),
     logger = require('koa-logger'),
     routes = require('./routes'),
+    auth = require('./middlewares/auth'),
     app = new Koa(),
     router = new KoaRouter();
 
@@ -17,6 +18,8 @@ app.use(async (ctx, next) => {
     ctx.set('Access-Control-Allow-Methods', 'GET,HEAD,PUT,POST,DELETE');
     await next();
 });
+
+app.use(auth());
 
 routes(router);
 app.use(router['routes']());

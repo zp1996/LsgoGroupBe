@@ -17,16 +17,6 @@ const baseJudge = ctx => {
     return flag || badRequest(ctx, RE[errKey].msg);
 };
 
-const verify = (token) => new Promise((resolve, reject) => {
-    jwt.verify(token, sercet, (err, decoded) => {
-        if (err) {
-            reject(err);
-        } else {
-            resolve(decoded);
-        }
-    });
-});
-
 module.exports = router => {
     router.post('/register', async ctx => {
         const flag = baseJudge(ctx);
@@ -61,14 +51,9 @@ module.exports = router => {
     });
 
     router.post('/auth', async ctx => {
-        const { token } = ctx.request.body;
-        try {
-            ctx.body = {
-                login: Boolean(await verify(token))
-            };
-        } catch (err) {
-            ctx.body = { login: false };
-        }
+        ctx.body = {
+            login: ctx.hasLogin
+        };
     });
 };
 
