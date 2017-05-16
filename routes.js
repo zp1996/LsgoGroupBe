@@ -1,4 +1,5 @@
 const user = require('./controllers/user');
+const group = require('./controllers/group');
 
 const notFound = (ctx) => {
     console.log(true);
@@ -9,8 +10,8 @@ const notFound = (ctx) => {
 };
 
 module.exports = router => {
-
     user(router);
+    group(router);
 
     router.get('*', notFound);
     router.post('*', notFound);

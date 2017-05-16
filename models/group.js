@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize'),
-    { BaseGet, getErrorMsg } = require('../helpers/model'),
+    { BaseGet, getErrorMsg, getAllRows } = require('../helpers/model'),
     sequelize = require('./sequelize');
 
 const Groups = sequelize.define('groups', {
@@ -22,17 +22,10 @@ const Groups = sequelize.define('groups', {
 });
 
 exports.findAllGroup = async () => {
+    const attributes = ['id', 'name', 'number', 'leader', 'mentor'];
     const groups = await Groups.findAll({
-        attributes: ['name', 'number', 'leader', 'mentor'],
+        attributes,
         where: { status: 1 }
     });
-    const res = [];
-    for (let group of groups) {
-        res.push({
-            name: group.name,
-            number: group.number,
-            leader: group.leader,
-            mentor: group.mentor
-        });
-    }
+    return getAllRows(groups, attributes);
 };

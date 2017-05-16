@@ -1,4 +1,5 @@
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken'),
+    { sercet } = require('../config');
 
 const verify = (token) => new Promise((resolve, reject) => {
     jwt.verify(token, sercet, (err, decoded) => {
@@ -16,7 +17,7 @@ module.exports = () => {
         if (url === '/login' || url === '/register') {
             await next();
         } else {
-            const { token } = ctx.request.body;
+            const token = ctx.cookies.get('token');
             try {
                 ctx.hasLogin = Boolean(await verify(token));
                 await next();
