@@ -29,3 +29,35 @@ exports.findAllGroup = async () => {
     });
     return getAllRows(groups, attributes);
 };
+
+const findGroup = async (conditions) => {
+    const groups = await Groups.findAll({
+        where: conditions,
+        attributes: ['id', 'name']
+    });
+    const res = [];
+    if (groups != null) {
+        for (let group of groups) {
+            res.push({
+                id: group.id,
+                name: group.name
+            });
+        }
+    }
+    return res;
+};
+
+exports.addGroup = async ({ name, leader, mentor }) => {
+    const groups = await findGroup({ name });
+    let res = null;
+    if (groups.length) {
+        res = getErrorMsg('小组名已经存在');
+    } else {
+        res = await Groups.create({
+            name,
+            leader,
+            mentor
+        });
+    }
+    return res;
+};

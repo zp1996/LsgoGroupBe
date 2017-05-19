@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt'),
     jwt = require('jsonwebtoken'),
-    { addUser, findUser } = require('../models/user'),
-    { badRequest } = require('../helpers/utils'),
+    { addUser, findUser, findAllUser } = require('../models/user'),
+    { badRequest, responseDB } = require('../helpers/utils'),
     RE = require('../helpers/pattern'),
     { sercet } = require('../config');
 
@@ -18,6 +18,10 @@ const baseJudge = ctx => {
 };
 
 module.exports = router => {
+    router.get('/users', async ctx => {
+        await responseDB(ctx, findAllUser);
+    });
+
     router.post('/register', async ctx => {
         const flag = baseJudge(ctx);
         if (!flag) return flag;
@@ -56,11 +60,3 @@ module.exports = router => {
         };
     });
 };
-
-function sleep() {
-    return new Promise((resolve, reject) => {
-        setTimeout(function () {
-            resolve();
-        }, 5000);
-    });
-}

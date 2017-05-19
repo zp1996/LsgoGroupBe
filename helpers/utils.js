@@ -3,7 +3,7 @@ exports.badRequest = (ctx, msg = '非法请求！') => {
     ctx.body = { msg };
 };
 
-exports.handleDB = async (fn, ...data) => {
+const handleDB = async (fn, ...data) => {
     try {
         const res = await fn.apply(null, data);
         return {
@@ -19,4 +19,19 @@ exports.handleDB = async (fn, ...data) => {
             }
         };
     }
+};
+exports.handleDB;
+
+exports.responseDB = async (ctx, fn, ...data) => {
+    const res = await handleDB(fn, ...data);
+    ctx.status = res.status;
+    ctx.body = res.data;
+};
+
+exports.getFields = (ctx, row, attrs) => {
+    ctx.body = attrs.reduce((obj, attr) => {
+        return Object.assign(obj, {
+            [attr]: row.get(attr)
+        })
+    }, {});
 };
