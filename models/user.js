@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize'),
     bcrypt = require('bcrypt'),
     sequelize = require('./sequelize'),
-    { BaseGet, getErrorMsg } = require('../helpers/model'),
+    { BaseGet, getErrorMsg, BaseDelete } = require('../helpers/model'),
     saltRounds = 10;
 
 const Users = sequelize.define('users', {
@@ -91,13 +91,4 @@ exports.addUser = async ({ username, email, password }) => {
     return res;
 };
 
-exports.deleteUser = async id => {
-    let err = null;
-    const user = await Users.update({
-        status: 0
-    }, {
-        where: { id }
-    });
-    Boolean(user[0]) || (err = getErrorMsg('该用户不存在'));
-    return err;
-};
+exports.deleteUser = BaseDelete(Users, '该用户不存在！');

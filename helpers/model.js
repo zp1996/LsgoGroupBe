@@ -4,10 +4,11 @@ exports.BaseGet = field => {
     };
 };
 
-exports.getErrorMsg = msg => ({
+const getErrorMsg = msg => ({
     status: 400,
     msg
 });
+exports.getErrorMsg = getErrorMsg;
 
 exports.getAllRows = (rows, attrs) => {
     const res = [];
@@ -21,4 +22,13 @@ exports.getAllRows = (rows, attrs) => {
         );
     }
     return res;
+};
+
+exports.BaseDelete = (model, msg) => async id => {
+    let err = null;
+    const row = await model.update({
+        status: 0
+    }, { where: { id } });
+    Boolean(row[0]) || (err = getErrorMsg(msg));
+    return err;
 };
