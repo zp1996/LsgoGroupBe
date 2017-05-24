@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize'),
     { BaseGet, getErrorMsg, getAllRows, BaseDelete } = require('../helpers/model'),
-    sequelize = require('./sequelize');
+    sequelize = require('./sequelize'),
+    { Users } = require('./user');
 
 const Groups = sequelize.define('groups', {
     name: {
@@ -28,7 +29,10 @@ exports.findAllGroup = async () => {
     const attributes = ['id', 'name', 'number', 'leader', 'mentor'];
     const groups = await Groups.findAll({
         attributes,
-        where: { status: 1 }
+        where: { status: 1 },
+        order: [
+            ['updated_at', 'ASC']
+        ]
     });
     return getAllRows(groups, attributes);
 };
@@ -36,14 +40,16 @@ exports.findAllGroup = async () => {
 const findGroup = async (conditions) => {
     const groups = await Groups.findAll({
         where: conditions,
-        attributes: ['id', 'name']
+        attributes: ['id', 'name', 'number', 'status'],
     });
     const res = [];
     if (groups != null) {
         for (let group of groups) {
             res.push({
                 id: group.id,
-                name: group.name
+                name: group.name,
+                status: group.status,
+                root: group
             });
         }
     }
@@ -53,15 +59,36 @@ const findGroup = async (conditions) => {
 exports.addGroup = async ({ name, leader, mentor }) => {
     const groups = await findGroup({ name });
     let res = null;
-    if (groups.length) {
-        res = getErrorMsg('小组名已经存在！');
-    } else {
+    if (!groups.length) {
         res = await Groups.create({
             name,
             number: 0,
             leader,
             mentor
         });
+    } else {
+        const group = groups[0];
+        if (group.status === 1) {
+            res = getErrorMsg('小组名已经存在！');
+        } else {
+            res = await group.root.update({
+                status: 1,
+                number: group.root.get('number')
+            });
+        }
+    }
+    return res;
+};
+
+exports.updateGroup = async (data) => {
+    const groups = await findGroup({ id: data.id });
+    if (groups.length) {
+        const group = groups[0];
+        res = await group.root.update(Object.assign(data, {
+            number: group.root.get('number')
+        }));
+    } else {
+        res = getErrorMsg('该小组不存在！');
     }
     return res;
 };

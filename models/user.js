@@ -1,7 +1,8 @@
 const Sequelize = require('sequelize'),
     bcrypt = require('bcrypt'),
     sequelize = require('./sequelize'),
-    { BaseGet, getErrorMsg, BaseDelete } = require('../helpers/model'),
+    { BaseGet, getErrorMsg, BaseDelete, getAllRows } = require('../helpers/model'),
+    { get } = require('../helpers/cache'),
     saltRounds = 10;
 
 const Users = sequelize.define('users', {
@@ -24,6 +25,7 @@ const Users = sequelize.define('users', {
         type: Sequelize.INTEGER
     }
 });
+exports.Users = Users;
 
 const BaseUserInfo = user => ({
     email: user.email,
@@ -31,20 +33,15 @@ const BaseUserInfo = user => ({
     password: user.password
 });
 
-exports.findAllUser = async () => {
+const findAllUser = async () => {
+    const attributes = ['id', 'username', 'email', 'type', 'group'];
     const users = await Users.findAll({
-        attributes: ['id', 'username'],
+        attributes: ['id', 'username', 'email'],
         where: { status: 1 }
     });
-    const res = [];
-    for (let user of users) {
-        res.push({
-            id: user.id,
-            username: user.username
-        });
-    }
-    return res;
+    return getAllRows(users, attributes);
 };
+exports.findAllUser = get(findAllUser).bind(null, 'users');
 
 exports.findUserById = async id => {
     const user = await Users.findById(id, {

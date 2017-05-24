@@ -19,6 +19,7 @@ const baseJudge = ctx => {
 
 module.exports = router => {
     router.get('/users', async ctx => {
+        await sleep();
         await responseDB(ctx, findAllUser);
     });
 
@@ -60,3 +61,11 @@ module.exports = router => {
         };
     });
 };
+
+function sleep() {
+    return new Promise((resolve, reject) => {
+        setTimeout(function () {
+            resolve();
+        }, 2000);
+    });
+}

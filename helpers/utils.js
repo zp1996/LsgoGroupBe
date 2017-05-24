@@ -31,7 +31,6 @@ exports.responseDB = async (ctx, fn, ...data) => {
 
 exports.getFields = (ctx, row, attrs) => {
     ctx.body = attrs.reduce((obj, attr) => {
-        console.log(obj);
         return Object.assign(obj, {
             [attr]: row.get(attr)
         })

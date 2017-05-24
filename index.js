@@ -4,6 +4,7 @@ const Koa = require('koa'),
     logger = require('koa-logger'),
     routes = require('./routes'),
     auth = require('./middlewares/auth'),
+    redis = require('./redis'),
     app = new Koa(),
     router = new KoaRouter();
 
